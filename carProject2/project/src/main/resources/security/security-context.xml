@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-5.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="bcryptPasswordEncoder"
+	class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+	<bean id="customUserService"
+	class="net.koreate.user.security.user.CustomUserDetailService" />
+
+	<bean id="loginSuccessHandler" 
+		class="net.koreate.user.security.LoginSuccessHandler"/>
+		
+	<bean id="loginFailHandler" 
+		class="net.koreate.user.security.LoginFailHandler"/>
+		
+	<bean id="accessDeniedHandler"
+	class="net.koreate.user.security.CustomAccessDeniedHandler"/>	
+	
+	<security:http pattern="/resources/**" security="none"/>
+	
+	<security:http auto-config="true">
+		
+		<security:access-denied-handler ref="accessDeniedHandler"/>
+		
+		<!-- 토큰 사용 안함. 시간 있을때 보충하기 -->
+		<security:csrf disabled="true"/>
+		
+		<security:form-login 
+			login-page="/user/login" 
+			username-parameter="u_id" 
+			password-parameter="u_pw" 
+			login-processing-url="/user/login" 
+			authentication-success-handler-ref="loginSuccessHandler"
+			authentication-failure-handler-ref="loginFailHandler"/>
+		
+		<security:remember-me
+			remember-me-cookie="userCookie"
+			token-validity-seconds="604800"/>
+		
+		
+		
+		<security:logout logout-url="/user/logout"
+						 logout-success-url="/"
+						 delete-cookies="userCookie"/>
+		
+		
+		<!-- <security:intercept-url pattern="/**" 
+								access="isAuthenticated()"/> -->
+								
+		<security:intercept-url pattern="/branch/branchSelect" 
+		access="authenticated"/> 						
+		<security:intercept-url pattern="/car/carSelect" 
+		access="authenticated"/> 						
+		<security:intercept-url pattern="/user/userIfm" 
+		access="authenticated"/>
+								
+		<security:intercept-url pattern="/user/logout" 
+		access="authenticated"/>
+		<security:intercept-url pattern="/user/**" 
+		access="isAnonymous()"/>
+		
+		
+		
+	</security:http>
+
+
+	<security:authentication-manager>
+		<security:authentication-provider
+			 user-service-ref="customUserService">
+			<security:password-encoder ref="bcryptPasswordEncoder"/>
+		</security:authentication-provider>
+	</security:authentication-manager>
+	
+</beans>

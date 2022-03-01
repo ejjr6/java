@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.koreate.user.dao.UserDAO">
+	
+	<resultMap id="userMap" type="net.koreate.user.vo.UserVO">
+		<id property="u_id" column="u_id"/>
+		<result property="u_no" column="u_no" />
+		<result property="u_id" column="u_id" />
+		<result property="u_pw" column="u_pw" />
+		<result property="u_profile" column="u_profile" />
+		<result property="u_phone" column="u_phone" />
+		<result property="u_name" column="u_name" />
+		<result property="u_birth" column="u_birth" />
+		<result property="u_withdraw" column="u_withdraw" />
+		
+		<collection property="authList" resultMap="authMap"/>
+		
+	</resultMap>
+	
+	<resultMap id="authMap" type="net.koreate.user.vo.AuthVO">
+		<result property="u_id" column="u_id"/>
+		<result property="u_auth" column="u_auth"/>
+	</resultMap>
+	
+	
+	<!-- UserVO getUserById(String u_id)throws Exception; -->
+	<select id="getUserById" parameterType="String" resultMap="userMap">
+		SELECT user.*, u_auth FROM
+		user_member AS user
+		LEFT OUTER JOIN
+		user_member_auth AS mauth
+		on user.u_id = mauth.u_id
+		WHERE user.u_id = #{u_id}
+		AND u_withdraw = 'n'; 
+		
+	</select>	
+
+	<!-- void userJoin(UserVO vo) throws Exception; -->
+	<insert id="userJoin" parameterType="net.koreate.user.vo.UserVO">
+		INSERT INTO user_member(u_id,u_pw,u_phone,u_birth,u_name)
+		VALUES(#{u_id},#{u_pw},#{u_phone},#{u_birth},#{u_name})
+	</insert>
+
+	<!-- void insertAuth(String u_id) throws Exception; -->
+	<insert id="insertAuth" parameterType="String">
+		INSERT INTO user_member_auth(u_id,u_auth)
+		VALUES(#{u_id}, 'ROLE_USER')
+	</insert>
+
+
+
+</mapper>
